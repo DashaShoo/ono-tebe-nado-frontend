@@ -35,6 +35,7 @@ export interface IBid {
     price: number
 }
 
+
 export interface IOrderResult {
     id: string;
 }
