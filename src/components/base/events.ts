@@ -1,13 +1,13 @@
 // Хорошая практика даже простые типы выносить в алиасы
 // Зато когда захотите поменять это достаточно сделать в одном месте
-type EventName = string | RegExp;
-type Subscriber = Function;
-type EmitterEvent = {
+type EventName = string | RegExp; //Позволяет использовать строку или регулярное выражение в качестве имени события.
+type Subscriber = Function; //подписчик — это любая функция, которая будет вызвана при наступлении события.
+type EmitterEvent = { //Структура события, которая содержит имя события и данные.
     eventName: string,
     data: unknown
 };
 
-export interface IEvents {
+export interface IEvents { //Описывает контракт (API) для классов, работающих с событиями
     on<T extends object>(event: EventName, callback: (data: T) => void): void;
     emit<T extends object>(event: string, data?: T): void;
     trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void;
@@ -17,6 +17,8 @@ export interface IEvents {
  * Брокер событий, классическая реализация
  * В расширенных вариантах есть возможность подписаться на все события
  * или слушать события по шаблону например
+ * Это коллекция подписчиков.
+ * Ключи — имена событий (EventName), значения — множества функций-подписчиков.
  */
 export class EventEmitter implements IEvents {
     _events: Map<EventName, Set<Subscriber>>;

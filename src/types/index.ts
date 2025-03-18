@@ -38,3 +38,11 @@ export interface IBid {
 export interface IOrderResult {
     id: string;
 }
+
+export interface IAppState {
+    catalog: ILot[];
+    basket: string[];
+    preview: string | null;
+    order: IOrder | null;
+    loading: boolean;
+}
