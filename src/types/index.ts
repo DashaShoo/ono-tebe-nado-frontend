@@ -1,3 +1,5 @@
+import { LotItem } from "../components/AppData";
+
 export type LotStatus = 'wait' | 'active' | 'closed';
 
 export interface IAuction {
@@ -47,3 +49,7 @@ export interface IAppState {
     order: IOrder | null;
     loading: boolean;
 }
+
+export type CatalogChangeEvent = {
+    catalog: LotItem[]
+};
