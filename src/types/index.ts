@@ -53,3 +53,18 @@ export interface IAppState {
 export type CatalogChangeEvent = {
     catalog: LotItem[]
 };
+
+export interface IBasketView {
+    items: HTMLElement[];
+    total: number;
+    selected: string[];
+}
+
+
+export type TabState = {
+    selected: string
+};
+
+export type TabActions = {
+    onClick: (tab: string) => void
+}

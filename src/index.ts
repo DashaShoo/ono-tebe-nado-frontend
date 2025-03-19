@@ -5,10 +5,12 @@ import {API_URL, CDN_URL} from "./utils/constants";
 import {EventEmitter} from "./components/base/events";
 import { AppState, LotItem } from './components/AppData';
 import { Page } from './components/Page';
-import { cloneTemplate, ensureElement } from './utils/utils';
+import { cloneTemplate, ensureElement, createElement } from './utils/utils';
 import { CatalogChangeEvent } from './types';
-import { CatalogItem, AuctionItem, Auction } from './components/Card';
+import { CatalogItem, AuctionItem, Auction, BidItem } from './components/Card';
 import { Modal } from "./components/common/Modal";
+import { Basket } from "./components/Basket";
+import {Tabs} from "./components/Tabs";
 
 const events = new EventEmitter();
 const api = new AuctionAPI(CDN_URL, API_URL);
@@ -38,7 +40,14 @@ const page = new Page(document.body, events);
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 
 // Переиспользуемые части интерфейса
-
+const cart = new Basket(cloneTemplate(basketTemplate), events);
+const bids = new Basket(cloneTemplate(bidsTemplate), events);
+const tabs = new Tabs(cloneTemplate(tabsTemplate), {
+    onClick: (name) => {
+        if (name === 'closed') events.emit('cart:open');
+        else events.emit('bids:open');
+    }
+});
 
 // Дальше идет бизнес-логика
 // Поймали событие, сделали что нужно
@@ -68,7 +77,7 @@ events.on('card:select', (item: LotItem) => {
     appData.setPreview(item);
 });
 
-
+//открытие модального окна карточки после клика
 events.on('preview:changed', (item: LotItem) => {
     const showItem = (it: LotItem) => {
         const card = new AuctionItem(cloneTemplate(cardPreviewTemplate));
@@ -129,6 +138,69 @@ events.on('modal:close', () => {
 });
 
 
+
+
+events.on('bids:open', () => {
+    modal.render({
+        content: createElement<HTMLElement>('div', {}, [
+            tabs.render({
+                selected: 'active'
+            }),
+            bids.render()
+        ])
+    });
+});
+
+events.on('cart:open', () => {
+    modal.render({
+        content: createElement<HTMLElement>('div', {}, [
+            tabs.render({
+                selected: 'closed'
+            }),
+            cart.render()
+        ])
+    });
+});
+
+
+//после ставки
+events.on('auction:changed', () => {
+    page.counter = appData.getClosedLots().length;
+    bids.items = appData.getActiveLots().map(item => {
+        const card = new BidItem(cloneTemplate(cardBasketTemplate), {
+            onClick: () => events.emit('preview:changed', item)
+        });
+        return card.render({
+            title: item.title,
+            image: item.image,
+            status: {
+                amount: item.price,
+                status: item.isMyBid
+            }
+        });
+    });
+    let total = 0;
+    cart.items = appData.getClosedLots().map(item => {
+        const card = new BidItem(cloneTemplate(soldTemplate), {
+            onClick: (event) => {
+                const checkbox = event.target as HTMLInputElement;
+                appData.toggleOrderedLot(item.id, checkbox.checked);
+                cart.total = appData.getTotal();
+                cart.selected = appData.order.items;
+            }
+        });
+        return card.render({
+            title: item.title,
+            image: item.image,
+            status: {
+                amount: item.price,
+                status: item.isMyBid
+            }
+        });
+    });
+    cart.selected = appData.order.items;
+    cart.total = total;
+});
 
 // Получаем лоты с сервера
 api.getLotList()
