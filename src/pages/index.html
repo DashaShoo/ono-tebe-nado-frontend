@@ -23,9 +23,9 @@
                 <img class="header__logo-image" src="<%=require('../images/logo.svg')%>" alt="Film! logo"/>
             </a>
             <nav class="header__menu">
-                <a class="header__menu-item" href="#">Главная</a>
-                <a class="header__menu-item" href="#">Посмотреть лоты</a>
-                <a class="header__menu-item" href="#">Об аукционе</a>
+                <a class="header__menu-item" href="#main">Главная</a>
+                <a class="header__menu-item" href="#lots">Посмотреть лоты</a>
+                <a class="header__menu-item" href="#about">Об аукционе</a>
             </nav>
             <button class="header__basket">
                 <span class="header__basket-counter" data-element="basket" data-component="basket">0</span>
@@ -33,19 +33,19 @@
         </div>
     </header>
 
-    <main class="page__container">
+    <main class="page__container" id="main">
         <section class="hero hero_centered">
             <h1 class="hero__title">Оно тебе надо!</h1>
             <p class="hero__description">Аукцион вещей, в которые никто не верил</p>
             <img class="hero__background" src="<%=require('../images/ligthning-decor.png')%>" alt=""/>
         </section>
 
-        <section class="catalog">
+        <section class="catalog" id="lots">
             <h2 class="catalog__title">Лоты</h2>
             <div  class="catalog__items" data-element="catalog" data-component="catalog"></div>
         </section>
 
-        <section class="about">
+        <section class="about" id="about">
             <img class="about__image" src="<%=require('../images/auction.jpg')%>" alt=""/>
             <h2 class="about__title">Об аукционе</h2>
             <p class="about__description">Здесь вы не встретите очередное пафосное собрание невероятно дорогого

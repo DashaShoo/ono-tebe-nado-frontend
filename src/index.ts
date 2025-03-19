@@ -12,6 +12,7 @@ import { Modal } from "./components/common/Modal";
 import { Basket } from "./components/Basket";
 import {Tabs} from "./components/Tabs";
 import {Order} from "./components/Order";
+import {Success} from "./components/Success";
 
 const events = new EventEmitter();
 const api = new AuctionAPI(CDN_URL, API_URL);
@@ -229,6 +230,29 @@ events.on('errors:change', (errors: Partial<IOrderForm>) => {
 events.on(/^order\..*:change/, (data: { field: keyof IOrderForm, value: string }) => {
     appData.setOrderField(data.field, data.value);
 });
+
+
+//oformlenie zakaza
+events.on('order:submit', () => {
+    api.orderLots(appData.order)
+        .then(() => {
+            const success = new Success(cloneTemplate(successTemplate), {
+                onClick: () => {
+                    modal.close();
+                    appData.clearBasket();
+                    events.emit('auction:changed');
+                }
+            });
+
+            modal.render({
+                content: success.render({})
+            });
+        })
+        .catch(err => {
+            console.error(err);
+        });
+});
+
 
 // Получаем лоты с сервера
 api.getLotList()
