@@ -6,11 +6,12 @@ import {EventEmitter} from "./components/base/events";
 import { AppState, LotItem } from './components/AppData';
 import { Page } from './components/Page';
 import { cloneTemplate, ensureElement, createElement } from './utils/utils';
-import { CatalogChangeEvent } from './types';
+import { CatalogChangeEvent, IOrderForm} from './types';
 import { CatalogItem, AuctionItem, Auction, BidItem } from './components/Card';
 import { Modal } from "./components/common/Modal";
 import { Basket } from "./components/Basket";
 import {Tabs} from "./components/Tabs";
+import {Order} from "./components/Order";
 
 const events = new EventEmitter();
 const api = new AuctionAPI(CDN_URL, API_URL);
@@ -48,6 +49,7 @@ const tabs = new Tabs(cloneTemplate(tabsTemplate), {
         else events.emit('bids:open');
     }
 });
+const order = new Order(cloneTemplate(orderTemplate), events);
 
 // Дальше идет бизнес-логика
 // Поймали событие, сделали что нужно
@@ -200,6 +202,32 @@ events.on('auction:changed', () => {
     });
     cart.selected = appData.order.items;
     cart.total = total;
+});
+
+
+//заказ
+events.on('order:open', () => {
+    modal.render({
+        content: order.render({
+            phone: '',
+            email: '',
+            valid: false,
+            errors: ''
+        })
+    });
+
+});
+
+
+//validacia
+events.on('errors:change', (errors: Partial<IOrderForm>) => {
+    const { email, phone } = errors;
+    order.valid = !email && !phone;
+    order.errors = Object.values({phone, email}).filter(i => !!i).join('; ');
+});
+
+events.on(/^order\..*:change/, (data: { field: keyof IOrderForm, value: string }) => {
+    appData.setOrderField(data.field, data.value);
 });
 
 // Получаем лоты с сервера
